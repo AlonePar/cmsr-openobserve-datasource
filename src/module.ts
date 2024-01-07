@@ -1,9 +1,13 @@
 import { DataSourcePlugin } from '@grafana/data';
-import { OpenObserveDataSource } from './datasource';
-import { ConfigEditor } from './components/ConfigEditor';
-import { QueryEditor } from './components/QueryEditor';
-import { MyQuery, MyDataSourceOptions } from './types';
+import { SqlQueryEditor } from './sql/components/QueryEditor';
+import { SQLQuery } from './sql/types';
 
-export const plugin = new DataSourcePlugin<OpenObserveDataSource, MyQuery, MyDataSourceOptions>(OpenObserveDataSource)
-  .setConfigEditor(ConfigEditor)
-  .setQueryEditor(QueryEditor);
+import { CheatSheet } from './CheatSheet';
+import { MySqlDatasource } from './MySqlDatasource';
+import { ConfigurationEditor } from './configuration/ConfigurationEditor';
+import { MySQLOptions } from './types';
+
+export const plugin = new DataSourcePlugin<MySqlDatasource, SQLQuery, MySQLOptions>(MySqlDatasource)
+  .setQueryEditor(SqlQueryEditor)
+  .setQueryEditorHelp(CheatSheet)
+  .setConfigEditor(ConfigurationEditor);
