@@ -15,6 +15,7 @@ export const DEFAULT_QUERY: Partial<MyQuery> = {
  */
 export interface OpenObserveDataSourceOptions extends DataSourceJsonData {
   organization: string;
+  userId: string;
 }
 
 

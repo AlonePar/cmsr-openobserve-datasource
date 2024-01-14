@@ -3,7 +3,6 @@ import {
   DataQueryResponse,
   DataSourceApi,
   DataSourceInstanceSettings,
-  MutableDataFrame,
   FieldType,
   TestDataSourceResponse,
 } from '@grafana/data';

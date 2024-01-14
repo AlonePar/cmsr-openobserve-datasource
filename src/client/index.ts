@@ -40,7 +40,7 @@ export class OpenObserveClient {
             method: "GET",
         });
         if (res.status < 400) {
-            return res.data
+            return res.data;
         }
         throw res;
     }
