@@ -1,15 +1,14 @@
 import { DataSourceInstanceSettings } from '@grafana/data';
 import { getBackendSrv, BackendSrvRequest, FetchResponse } from '@grafana/runtime';
-import { OpenObserveDataSourceOptions } from "./root-types";
-import { OpenObserveResponse } from './types';
+import { OpenObserveResponse, OpenObserveSqlOptions } from './types';
 import { lastValueFrom } from 'rxjs';
 
 export * from './types'
 
 export class OpenObserveClient {
-    settings: DataSourceInstanceSettings<OpenObserveDataSourceOptions>;
+    settings: DataSourceInstanceSettings<OpenObserveSqlOptions>;
 
-    constructor(settings: DataSourceInstanceSettings<OpenObserveDataSourceOptions>) {
+    constructor(settings: DataSourceInstanceSettings<OpenObserveSqlOptions>) {
         this.settings = settings;
     }
 
@@ -20,7 +19,7 @@ export class OpenObserveClient {
             headers: {
                 "Content-Type": req.data ? "application/json; charset=UTF-8" : undefined,
                 ...req.headers,
-                'Authorization': this.settings.basicAuth,
+                'Authorization': this.settings.jsonData.basicAuth,
                 'organization': this.settings.jsonData.organization ?? "default",
             }
         }));
@@ -46,7 +45,7 @@ export class OpenObserveClient {
     }
 
     private normalizeUrl(url: string): string {
-        return url.replace("{org_id}", this.settings.jsonData.organization);
+        return url.replace("{org_id}", this.settings.jsonData.organization!);
     }
 }
 

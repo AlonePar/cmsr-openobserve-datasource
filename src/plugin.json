@@ -1,13 +1,14 @@
 {
   "$schema": "https://raw.githubusercontent.com/grafana/grafana/main/docs/sources/developers/plugins/plugin.schema.json",
   "type": "datasource",
-  "name": "Openobserve Grafana Plugin",
-  "id": "cmsr-openobserve-datasource",
+  "name": "some Grafana Plugin",
+  "id": "dave001-some-datasource",
   "metrics": true,
+	"logs": true,
   "info": {
-    "description": "Openobserve datasource plugin for grafana",
+    "description": "some datasource plugin for grafana",
     "author": {
-      "name": "cmsr"
+      "name": "dave001"
     },
     "keywords": ["datasource"],
     "logos": {

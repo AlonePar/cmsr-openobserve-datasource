@@ -53,15 +53,14 @@ const config = async (env): Promise<Configuration> => {
       'react-router-dom',
       'd3',
       'angular',
-      'tslib',
-      'sql-formatter-plus',
+      // 'sql-formatter-plus',
       '@grafana/ui',
       '@grafana/runtime',
       '@grafana/data',
       '@grafana/schema',
-      '@grafana/experimental',
-      "@react-awesome-query-builder/core",
-      "@react-awesome-query-builder/ui",
+      // '@grafana/experimental',
+      // "@react-awesome-query-builder/core",
+      // "@react-awesome-query-builder/ui",
 
       // Mark legacy SDK imports as external if their name starts with the "grafana/" prefix
       ({ request }, callback) => {

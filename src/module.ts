@@ -3,11 +3,12 @@ import { SqlQueryEditor } from './sql/components/QueryEditor';
 import { SQLQuery } from './sql/types';
 
 import { CheatSheet } from './CheatSheet';
-import { MySqlDatasource } from './MySqlDatasource';
-import { ConfigurationEditor } from './configuration/ConfigurationEditor';
-import { MySQLOptions } from './types';
+import { OpenObserveDatasource } from './OpenObserveDatasource';
+import { OpenObserveSecureOptions, OpenObserveSqlOptions } from './client/types';
+import { ConfigurationEditor } from 'configuration/ConfigurationEditor';
 
-export const plugin = new DataSourcePlugin<MySqlDatasource, SQLQuery, MySQLOptions>(MySqlDatasource)
+
+export const plugin = new DataSourcePlugin<OpenObserveDatasource, SQLQuery, OpenObserveSqlOptions, OpenObserveSecureOptions>(OpenObserveDatasource)
   .setQueryEditor(SqlQueryEditor)
   .setQueryEditorHelp(CheatSheet)
   .setConfigEditor(ConfigurationEditor);

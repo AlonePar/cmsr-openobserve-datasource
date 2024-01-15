@@ -4,16 +4,17 @@ import { SqlDatasource } from './sql/datasource/SqlDatasource';
 import { DB, SQLQuery } from './sql/types';
 import { formatSQL } from './sql/utils/formatSQL';
 
-import { mapFieldsToTypes } from './fields';
-import { buildColumnQuery, buildTableQuery, showDatabases } from './mySqlMetaQuery';
 import { getSqlCompletionProvider } from './sqlCompletionProvider';
-import { quoteIdentifierIfNecessary, quoteLiteral, toRawSql } from './sqlUtil';
-import { MySQLOptions } from './types';
+import { quoteIdentifierIfNecessary, quoteLiteral, toRawSql } from './client/sqlUtils';
+import { OpenObserveClient, OpenObserveSqlOptions } from './client';
+import { queryOrgnizations, queryStream, queryStreams } from './client/metaQuery';
+import { mapFieldsToTypes } from './client/model/fields';
 
-export class MySqlDatasource extends SqlDatasource {
+export class OpenObserveDatasource extends SqlDatasource {
   sqlLanguageDefinition: LanguageDefinition | undefined;
 
-  constructor(private instanceSettings: DataSourceInstanceSettings<MySQLOptions>) {
+  constructor(private instanceSettings: DataSourceInstanceSettings<OpenObserveSqlOptions>,
+        private client: OpenObserveClient) {
     super(instanceSettings);
   }
 
@@ -31,7 +32,7 @@ export class MySqlDatasource extends SqlDatasource {
     };
 
     this.sqlLanguageDefinition = {
-      id: 'mysql',
+      id: 'openobserve',
       completionProvider: getSqlCompletionProvider(args),
       formatter: formatSQL,
     };
@@ -40,27 +41,26 @@ export class MySqlDatasource extends SqlDatasource {
   }
 
   async fetchDatasets(): Promise<string[]> {
-    const datasets = await this.runSql<string[]>(showDatabases(), { refId: 'datasets' });
-    return datasets.map((t) => quoteIdentifierIfNecessary(t[0]));
+    const orgs = await queryOrgnizations(this.client);
+    return orgs.map((org) => org.identifier);
   }
 
   async fetchTables(dataset?: string): Promise<string[]> {
-    const tables = await this.runSql<string[]>(buildTableQuery(dataset), { refId: 'tables' });
-    return tables.map((t) => quoteIdentifierIfNecessary(t[0]));
+    const streams = await queryStreams(this.client, dataset);
+    return streams.map((stream) => stream.name);
   }
 
   async fetchFields(query: Partial<SQLQuery>) {
     if (!query.dataset || !query.table) {
       return [];
     }
-    const queryString = buildColumnQuery(query.table, query.dataset);
-    const frame = await this.runSql<string[]>(queryString, { refId: 'fields' });
-    const fields = frame.map((f) => ({
-      name: f[0],
-      text: f[0],
-      value: quoteIdentifierIfNecessary(f[0]),
-      type: f[1],
-      label: f[0],
+    const schema = await queryStream(this.client, query.table, query.dataset);
+    const fields = schema.schema.map((f) => ({
+        name: f.name,
+        text: f.name,
+        value: quoteIdentifierIfNecessary(f.name),
+        type: f.type,
+        label: f.name,
     }));
     return mapFieldsToTypes(fields);
   }
@@ -99,7 +99,7 @@ export class MySqlDatasource extends SqlDatasource {
         Promise.resolve({ query, error: '', isError: false, isValid: true }),
       dsID: () => this.id,
       toRawSql,
-      functions: () => ['VARIANCE', 'STDDEV'],
+      functions: () => ['HISTOGRAM'],
       getEditorLanguageDefinition: () => this.getSqlLanguageDefinition(),
     };
   }

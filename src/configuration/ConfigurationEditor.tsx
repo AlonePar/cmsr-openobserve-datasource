@@ -3,20 +3,15 @@ import React, { SyntheticEvent, useState } from 'react';
 import {
   DataSourcePluginOptionsEditorProps,
   onUpdateDatasourceJsonDataOption,
-  onUpdateDatasourceSecureJsonDataOption,
   updateDatasourcePluginJsonDataOption,
-  updateDatasourcePluginResetOption,
 } from '@grafana/data';
 import { ConfigSection, ConfigSubSection, DataSourceDescription, Stack } from '@grafana/experimental';
-import { config } from '@grafana/runtime';
 import {
   Collapse,
   Field,
   Icon,
   Input,
   Label,
-  SecretInput,
-  SecureSocksProxySettings,
   Switch,
   Tooltip,
 } from '@grafana/ui';
@@ -24,37 +19,39 @@ import { ConnectionLimits } from '../sql/components/configuration/ConnectionLimi
 import { Divider } from '../sql/components/configuration/Divider';
 import { TLSSecretsConfig } from '../sql/components/configuration/TLSSecretsConfig';
 
-import { MySQLOptions } from '../types';
+import { OpenObserveSecureOptions, OpenObserveSqlOptions } from '../client/types';
 
-export const ConfigurationEditor = (props: DataSourcePluginOptionsEditorProps<MySQLOptions>) => {
+export const ConfigurationEditor = (props: DataSourcePluginOptionsEditorProps<OpenObserveSqlOptions, OpenObserveSecureOptions>) => {
   const [isOpen, setIsOpen] = useState(true);
 
   const { options, onOptionsChange } = props;
   const jsonData = options.jsonData;
 
-  const onResetPassword = () => {
-    updateDatasourcePluginResetOption(props, 'password');
-  };
-
-  const onDSOptionChanged = (property: keyof MySQLOptions) => {
+  const onDSOptionChanged = (property: keyof OpenObserveSqlOptions) => {
     return (event: SyntheticEvent<HTMLInputElement>) => {
       onOptionsChange({ ...options, ...{ [property]: event.currentTarget.value } });
     };
   };
 
-  const onSwitchChanged = (property: keyof MySQLOptions) => {
+  const onSwitchChanged = (property: keyof OpenObserveSqlOptions) => {
     return (event: SyntheticEvent<HTMLInputElement>) => {
       updateDatasourcePluginJsonDataOption(props, property, event.currentTarget.checked);
     };
   };
+
+  // const onSecureOptionChanged = (property: keyof OpenObserveSecureOptions) => {
+  //   return (event: SyntheticEvent<HTMLInputElement>) => {
+  //     updateDatasourcePluginSecureJsonDataOption(props, property, event.currentTarget.value);
+  //   };
+  // }
 
   const WIDTH_LONG = 40;
 
   return (
     <>
       <DataSourceDescription
-        dataSourceName="MySQL"
-        docsLink="https://grafana.com/docs/grafana/latest/datasources/mysql/"
+        dataSourceName="Openobserve"
+        docsLink="https://openobserve.ai/"
         hasRequiredFields={true}
       />
 
@@ -83,13 +80,13 @@ export const ConfigurationEditor = (props: DataSourcePluginOptionsEditorProps<My
           />
         </Field>
 
-        <Field label="Database name">
+        <Field label="Orgnization name" required>
           <Input
             width={WIDTH_LONG}
-            name="database"
-            value={jsonData.database || ''}
-            placeholder="Database"
-            onChange={onUpdateDatasourceJsonDataOption(props, 'database')}
+            name="organization"
+            value={jsonData.organization || ''}
+            placeholder="Organization"
+            onChange={onDSOptionChanged('organization')}
           />
         </Field>
       </ConfigSection>
@@ -100,19 +97,20 @@ export const ConfigurationEditor = (props: DataSourcePluginOptionsEditorProps<My
         <Field label="Username" required>
           <Input
             width={WIDTH_LONG}
-            value={options.user || ''}
+            value={jsonData.user || ''}
             placeholder="Username"
             onChange={onDSOptionChanged('user')}
           />
         </Field>
 
-        <Field label="Password">
-          <SecretInput
+        <Field label="Basic Authorization Header">
+          <Input
             width={WIDTH_LONG}
-            placeholder="Password"
-            isConfigured={options.secureJsonFields && options.secureJsonFields.password}
-            onReset={onResetPassword}
-            onBlur={onUpdateDatasourceSecureJsonDataOption(props, 'password')}
+            name="basicAuth"
+            value={jsonData.basicAuth || ''}
+            placeholder="Basic xxxxx"
+            type="password"
+            onChange={onDSOptionChanged('basicAuth')}
           />
         </Field>
 
@@ -132,16 +130,6 @@ export const ConfigurationEditor = (props: DataSourcePluginOptionsEditorProps<My
           description="When enabled, skips verification of the MySQL server's TLS certificate chain and host name."
         >
           <Switch onChange={onSwitchChanged('tlsSkipVerify')} value={jsonData.tlsSkipVerify || false} />
-        </Field>
-
-        <Field
-          label="Allow Cleartext Passwords"
-          description="Allows using the cleartext client side plugin if required by an account."
-        >
-          <Switch
-            onChange={onSwitchChanged('allowCleartextPasswords')}
-            value={jsonData.allowCleartextPasswords || false}
-          />
         </Field>
       </ConfigSection>
 
@@ -228,9 +216,6 @@ export const ConfigurationEditor = (props: DataSourcePluginOptionsEditorProps<My
 
         <ConnectionLimits options={options} onOptionsChange={onOptionsChange} />
 
-        {config.secureSocksDSProxyEnabled && (
-          <SecureSocksProxySettings options={options} onOptionsChange={onOptionsChange} />
-        )}
       </ConfigSection>
     </>
   );

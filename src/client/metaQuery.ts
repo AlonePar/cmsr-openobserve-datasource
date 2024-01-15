@@ -8,7 +8,7 @@ export async function queryOrgnizations(client: OpenObserveClient): Promise<OrgD
         url: "/api/{org_id}/organizations",
         method: "GET",
         headers: {
-            "user_id": client.settings.jsonData.userId,
+            "user_id": client.settings.jsonData.user,
         }
     });
     if (res.status < 400) {
@@ -33,7 +33,7 @@ export async function queryStreams(client: OpenObserveClient, org?: string, stre
     throw res;
 }
 
-export async function queryFields(client: OpenObserveClient, streamName: string, streamType?: StreamType, org?: string): Promise<Stream> {
+export async function queryStream(client: OpenObserveClient, streamName: string, org?: string, streamType?: StreamType): Promise<Stream> {
     const orgId = org ?? "{org_id}"
     const res = await client.request({
         url: `/api/${orgId}/${streamName}/schema`,

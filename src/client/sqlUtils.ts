@@ -1,7 +1,7 @@
 import { isEmpty } from 'lodash';
 
-import { SQLQuery } from './sql/types';
-import { createSelectClause, haveColumns } from './sql/utils/sql.utils';
+import { SQLQuery } from '../sql/types';
+import { createSelectClause, haveColumns } from '../sql/utils/sql.utils';
 
 export function toRawSql({ sql, dataset, table }: SQLQuery): string {
   let rawQuery = '';
