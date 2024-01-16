@@ -1,4 +1,4 @@
-import { lastValueFrom, Observable, throwError } from 'rxjs';
+import { lastValueFrom, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import {
@@ -16,11 +16,9 @@ import {
   VariableWithMultiSupport,
   TimeRange,
 } from '@grafana/data';
-import { EditorMode } from '@grafana/experimental';
 import { DataQuery, DataSourceRef } from '@grafana/schema';
 import {
   BackendDataSourceResponse,
-  DataSourceWithBackend,
   FetchResponse,
   getBackendSrv,
   getTemplateSrv,
@@ -34,10 +32,9 @@ import { SqlQueryEditor } from '../components/QueryEditor';
 import { MACRO_NAMES } from '../constants';
 import { DB, SQLQuery, SQLOptions, SqlQueryModel, QueryFormat } from '../types';
 import migrateAnnotation from '../utils/migration';
+import { DataSourceWithoutBackend } from './DataSourceWithoutBackend';
 
-import { isSqlDatasourceDatabaseSelectionFeatureFlagEnabled } from './../components/QueryEditorFeatureFlag.utils';
-
-export abstract class SqlDatasource extends DataSourceWithBackend<SQLQuery, SQLOptions> {
+export abstract class SqlDatasource extends DataSourceWithoutBackend<SQLQuery, SQLOptions> {
   id: number;
   responseParser: ResponseParser;
   name: string;
@@ -129,16 +126,6 @@ export abstract class SqlDatasource extends DataSourceWithBackend<SQLQuery, SQLO
   }
 
   query(request: DataQueryRequest<SQLQuery>): Observable<DataQueryResponse> {
-    // This logic reenables the previous SQL behavior regarding what databases are available for the user to query.
-    if (isSqlDatasourceDatabaseSelectionFeatureFlagEnabled()) {
-      const databaseIssue = this.checkForDatabaseIssue(request);
-
-      if (!!databaseIssue) {
-        const error = new Error(databaseIssue);
-        return throwError(() => error);
-      }
-    }
-
     request.targets.forEach((target) => {
       if (request.app === CoreApp.Dashboard || request.app === CoreApp.PanelViewer) {
         return;
@@ -153,36 +140,6 @@ export abstract class SqlDatasource extends DataSourceWithBackend<SQLQuery, SQLO
     });
 
     return super.query(request);
-  }
-
-  private checkForDatabaseIssue(request: DataQueryRequest<SQLQuery>) {
-    // If the datasource is Postgres and there is no default database configured - either never configured or removed - return a database issue.
-    if (this.type === 'postgres' && !this.preconfiguredDatabase) {
-      return `You do not currently have a default database configured for this data source. Postgres requires a default
-             database with which to connect. Please configure one through the Data Sources Configuration page, or if you
-             are using a provisioning file, update that configuration file with a default database.`;
-    }
-
-    // No need to check for database change/update issues if the datasource is being used in Explore.
-    if (request.app !== CoreApp.Explore) {
-      /*
-        If a preconfigured datasource database has been added/updated - and the user has built ANY number of queries using a
-        database OTHER than the preconfigured one, return a database issue - since those databases are no longer available.
-        The user will need to update their queries to use the preconfigured database.
-      */
-      if (!!this.preconfiguredDatabase) {
-        for (const target of request.targets) {
-          // Test for database configuration change only if query was made in `builder` mode.
-          if (target.editorMode === EditorMode.Builder && target.dataset !== this.preconfiguredDatabase) {
-            return `The configuration for this panel's data source has been modified. The previous database used in this panel's
-                   saved query is no longer available. Please update the query to use the new database option.
-                   Previous query parameters will be preserved until the query is updated.`;
-          }
-        }
-      }
-    }
-
-    return;
   }
 
   async metricFindQuery(query: string, options?: LegacyMetricFindQueryOptions): Promise<MetricFindValue[]> {

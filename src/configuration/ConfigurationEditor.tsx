@@ -39,6 +39,12 @@ export const ConfigurationEditor = (props: DataSourcePluginOptionsEditorProps<Op
     };
   };
 
+  const onDsJsonDataChange = (property: keyof OpenObserveSqlOptions) => {
+    return (event: SyntheticEvent<HTMLInputElement>) => {
+      updateDatasourcePluginJsonDataOption(props, property, event.currentTarget.value);
+    };
+  }
+
   // const onSecureOptionChanged = (property: keyof OpenObserveSecureOptions) => {
   //   return (event: SyntheticEvent<HTMLInputElement>) => {
   //     updateDatasourcePluginSecureJsonDataOption(props, property, event.currentTarget.value);
@@ -84,9 +90,10 @@ export const ConfigurationEditor = (props: DataSourcePluginOptionsEditorProps<Op
           <Input
             width={WIDTH_LONG}
             name="organization"
+            type="text"
             value={jsonData.organization || ''}
             placeholder="Organization"
-            onChange={onDSOptionChanged('organization')}
+            onChange={onDsJsonDataChange('organization')}
           />
         </Field>
       </ConfigSection>
@@ -97,9 +104,11 @@ export const ConfigurationEditor = (props: DataSourcePluginOptionsEditorProps<Op
         <Field label="Username" required>
           <Input
             width={WIDTH_LONG}
+            name="user"
+            type="text"
             value={jsonData.user || ''}
             placeholder="Username"
-            onChange={onDSOptionChanged('user')}
+            onChange={onDsJsonDataChange('user')}
           />
         </Field>
 
@@ -108,9 +117,8 @@ export const ConfigurationEditor = (props: DataSourcePluginOptionsEditorProps<Op
             width={WIDTH_LONG}
             name="basicAuth"
             value={jsonData.basicAuth || ''}
-            placeholder="Basic xxxxx"
             type="password"
-            onChange={onDSOptionChanged('basicAuth')}
+            onChange={onDsJsonDataChange('basicAuth')}
           />
         </Field>
 

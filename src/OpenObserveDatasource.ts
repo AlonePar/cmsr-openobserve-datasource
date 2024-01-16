@@ -12,10 +12,11 @@ import { mapFieldsToTypes } from './client/model/fields';
 
 export class OpenObserveDatasource extends SqlDatasource {
   sqlLanguageDefinition: LanguageDefinition | undefined;
+  client: OpenObserveClient;
 
-  constructor(private instanceSettings: DataSourceInstanceSettings<OpenObserveSqlOptions>,
-        private client: OpenObserveClient) {
+  constructor(private instanceSettings: DataSourceInstanceSettings<OpenObserveSqlOptions>) {
     super(instanceSettings);
+    this.client = new OpenObserveClient(instanceSettings);
   }
 
   getQueryModel() {

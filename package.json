@@ -1,7 +1,7 @@
 {
-  "name": "openobserve-grafana-plugin",
+  "name": "dave001-datasource",
   "version": "1.0.0",
-  "description": "Openobserve datasource plugin for grafana",
+  "description": "some datasource plugin for grafana",
   "scripts": {
     "build": "webpack -c ./.config/webpack/webpack.config.ts --env production",
     "dev": "webpack -w -c ./.config/webpack/webpack.config.ts --env development",
